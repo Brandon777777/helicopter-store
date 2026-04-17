@@ -18,10 +18,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ─── Conexión a PostgreSQL ────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
+
 
 // Verificar conexión al iniciar
 pool.connect((err, client, release) => {
