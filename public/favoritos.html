@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Favoritos — AeroLux</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">✈ AeroLux</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-logo">Aero<span>Lux</span></div>
+  <div class="hamburger"><span></span><span></span><span></span></div>
+  <ul class="nav-links">
+    <li><a href="index.html"> Inicio</a></li>
+    <li><a href="catalogo.html"> Catálogo</a></li>
+    <li><a href="carrito.html"> Carrito <span class="nav-badge" id="cart-badge">0</span></a></li>
+    <li><a href="favoritos.html"> Favoritos <span class="nav-badge" id="fav-badge">0</span></a></li>
+    <li><a href="admin.html"> Admin</a></li>
+  </ul>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <p class="section-subtitle">✦ Mi Lista de Deseos</p>
+  <h1 class="section-title">Mis <span>Favoritos</span></h1>
+</div>
+
+<div class="section">
+  <div id="fav-container">
+    <!-- Relleno por JS -->
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>AeroLux</h3><p>La tienda de helicópteros de lujo más exclusiva del mercado.</p></div>
+    <div class="footer-col"><h4>Páginas</h4><a href="index.html">Inicio</a><a href="catalogo.html">Catálogo</a></div>
+    <div class="footer-col"><h4>Contacto</h4><a href="#">info@aerolux.com</a></div>
+  </div>
+  <div class="footer-bottom"><span>© 2024 AeroLux</span></div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', renderFavorites);
+
+  function renderFavorites() {
+    const container = document.getElementById('fav-container');
+    const favs = getFavorites();
+
+    if (favs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon"></div>
+          <h2 class="empty-state__title">Sin favoritos aún</h2>
+          <p style="color:var(--gray);margin-top:8px;margin-bottom:28px">Guarda helicópteros que te interesen desde el catálogo</p>
+          <a href="catalogo.html" class="btn btn-gold">Explorar Catálogo</a>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        ${favs.map(h => `
+          <div class="cart-item" id="fav-${h.id}">
+            <img class="cart-item__img"
+              src="${h.imagen || 'https://via.placeholder.com/100x70/1a1a1a/d4af37?text=Heli'}"
+              alt="${h.marca} ${h.modelo}"
+              onerror="this.src='https://via.placeholder.com/100x70/1a1a1a/d4af37?text=Heli'" />
+            <div class="cart-item__info">
+              <p class="cart-item__brand">${h.marca}</p>
+              <p class="cart-item__name">${h.modelo} — ${h.anio}</p>
+              <p class="cart-item__price">${formatPrice(h.precio)}</p>
+              <p style="font-size:.72rem;color:var(--gray);margin-top:2px">
+                ${h.disponible ? '✅ Disponible' : '❌ No disponible'}
+              </p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+              <!-- Mover al carrito (el extra importante) -->
+              <button class="btn btn-gold btn-sm" onclick="moveToCart(${h.id})"
+                ${!h.disponible ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
+                 Mover al carrito
+              </button>
+              <button class="cart-item__remove" onclick="handleRemoveFav(${h.id})" title="Eliminar favorito">✕</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      ${favs.length > 1 ? `
+        <div style="margin-top:24px;text-align:right;">
+          <button class="btn btn-danger btn-sm" onclick="clearFavs()">
+             Vaciar favoritos
+          </button>
+        </div>` : ''}
+    `;
+  }
+
+  function handleRemoveFav(id) {
+    removeFromFavorites(id);
+    const el = document.getElementById(`fav-${id}`);
+    if (el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-20px)';
+      el.style.transition = 'all 0.3s ease';
+      setTimeout(renderFavorites, 300);
+    }
+    showToast('Eliminado de favoritos', 'info');
+  }
+
+  function moveToCart(id) {
+    const favs = getFavorites();
+    const heli = favs.find(h => h.id === id);
+    if (!heli) return;
+    addToCart(heli);           // Agrega al carrito
+    removeFromFavorites(id);   // Quita de favoritos
+    renderFavorites();         // Re-renderiza
+  }
+
+  function clearFavs() {
+    if (!confirm('¿Vaciar todos los favoritos?')) return;
+    saveFavorites([]);
+    renderFavorites();
+    showToast('Favoritos vaciados', 'info');
+  }
+</script>
+</body>
+</html>

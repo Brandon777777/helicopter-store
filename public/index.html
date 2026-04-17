@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AeroLux — Tienda de Helicópteros de Lujo</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ─── Loader ─── -->
+<div id="loader">
+  <div class="loader-logo">✈ AeroLux</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<!-- ─── Toast container ─── -->
+<div id="toast-container"></div>
+
+<!-- ─── Navbar ─── -->
+<nav class="navbar">
+  <div class="nav-logo">Aero<span>Lux</span></div>
+  <div class="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html"> Inicio</a></li>
+    <li><a href="catalogo.html"> Catálogo</a></li>
+    <li>
+      <a href="carrito.html">
+         Carrito
+        <span class="nav-badge" id="cart-badge">0</span>
+      </a>
+    </li>
+    <li>
+      <a href="favoritos.html">
+         Favoritos
+        <span class="nav-badge" id="fav-badge">0</span>
+      </a>
+    </li>
+    <li><a href="admin.html"> Admin</a></li>
+  </ul>
+</nav>
+
+<!-- ─── Hero ─── -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__content">
+    <p class="hero__eyebrow">✦ Colección Exclusiva 2024 ✦</p>
+    <h1 class="hero__title">El Cielo<br>es tu <em>Destino</em></h1>
+    <p class="hero__desc">
+      Descubre la más exclusiva selección de helicópteros de lujo.
+      Ingeniería de élite, diseño impecable, experiencia inigualable.
+    </p>
+    <a href="catalogo.html" class="btn btn-gold">Ver Catálogo Completo</a>
+  </div>
+  <div class="hero__scroll">Explorar</div>
+</section>
+
+<!-- ─── Productos Destacados ─── -->
+<section class="section" id="featured">
+  <p class="section-subtitle">✦ Selección Premium</p>
+  <h2 class="section-title">Helicópteros <span>Destacados</span></h2>
+  <div class="divider"></div>
+
+  <div class="heli-grid" id="featured-grid">
+    <!-- Cargando... -->
+    <div class="empty-state">
+      <div class="loader-spinner" style="margin:0 auto"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:50px">
+    <a href="catalogo.html" class="btn btn-outline">Ver Colección Completa →</a>
+  </div>
+</section>
+
+<!-- ─── Por qué elegirnos ─── -->
+<section style="background: var(--black-soft); padding: 80px 2rem;">
+  <div style="max-width:1300px; margin:0 auto;">
+    <p class="section-subtitle" style="text-align:center">✦ La Diferencia AeroLux</p>
+    <h2 class="section-title" style="text-align:center; margin-bottom:8px">
+      Por Qué <span>Elegirnos</span>
+    </h2>
+    <div class="divider" style="margin:16px auto 50px"></div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px;">
+      <div class="feature-card" style="text-align:center; padding:36px 24px;">
+        <div style="font-size:2.5rem; margin-bottom:16px;">🏆</div>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-bottom:10px;">Calidad Certificada</h3>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.8;">Cada aeronave pasa por rigurosas inspecciones técnicas antes de estar disponible.</p>
+      </div>
+      <div style="text-align:center; padding:36px 24px;">
+        <div style="font-size:2.5rem; margin-bottom:16px;">🌍</div>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-bottom:10px;">Envío Mundial</h3>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.8;">Coordinamos traslados y logística a cualquier parte del mundo con total seguridad.</p>
+      </div>
+      <div style="text-align:center; padding:36px 24px;">
+        <div style="font-size:2.5rem; margin-bottom:16px;">🤝</div>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-bottom:10px;">Asesoría Exclusiva</h3>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.8;">Nuestros expertos te guían en cada paso para encontrar la aeronave perfecta.</p>
+      </div>
+      <div style="text-align:center; padding:36px 24px;">
+        <div style="font-size:2.5rem; margin-bottom:16px;">🔒</div>
+        <h3 style="font-family:var(--font-display);font-size:1.3rem;color:var(--gold);margin-bottom:10px;">Garantía Total</h3>
+        <p style="font-size:0.82rem;color:var(--gray);line-height:1.8;">Respaldamos cada compra con garantías y soporte post-venta de primer nivel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ─── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>AeroLux</h3>
+      <p>La tienda de helicópteros de lujo más exclusiva del mercado. Calidad, elegancia y rendimiento en cada aeronave.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navegación</h4>
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="carrito.html">Carrito</a>
+      <a href="favoritos.html">Favoritos</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="#">info@aerolux.com</a>
+      <a href="#">+1 (800) AEROLUX</a>
+      <a href="#">Miami, FL — Dubai — Ginebra</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 AeroLux. Todos los derechos reservados.</span>
+    <span>Diseñado con ✦ para amantes del cielo</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Cargar helicópteros destacados (primeros 3 disponibles)
+  document.addEventListener('DOMContentLoaded', async () => {
+    const grid = document.getElementById('featured-grid');
+    try {
+      const helis = await fetchJSON('/helicopteros');
+      const featured = helis.filter(h => h.disponible).slice(0, 3);
+
+      if (featured.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-state__icon">🚁</div><p class="empty-state__title">Sin productos disponibles</p></div>';
+        return;
+      }
+
+      grid.innerHTML = featured.map(h => buildCard(h)).join('');
+      attachCardEvents();
+    } catch (err) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-state__icon">⚠️</div><p class="empty-state__title">Error al cargar productos</p><p style="color:var(--gray);font-size:.8rem">${err.message}</p></div>`;
+    }
+  });
+
+  function buildCard(h) {
+    return `
+    <div class="heli-card">
+      <div class="heli-card__img-wrap">
+        <img class="heli-card__img" src="${h.imagen || 'https://via.placeholder.com/400x210/1a1a1a/d4af37?text=No+imagen'}" alt="${h.marca} ${h.modelo}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x210/1a1a1a/d4af37?text=Sin+Imagen'"/>
+        <span class="heli-card__badge ${h.disponible ? 'badge-available' : 'badge-unavailable'}">
+          ${h.disponible ? 'Disponible' : 'No disponible'}
+        </span>
+      </div>
+      <div class="heli-card__body">
+        <p class="heli-card__brand">${h.marca}</p>
+        <h3 class="heli-card__model">${h.modelo}</h3>
+        <p class="heli-card__year">Año ${h.anio}</p>
+        <p class="heli-card__price">${formatPrice(h.precio)}</p>
+      </div>
+      <div class="heli-card__actions">
+        <button class="btn btn-gold btn-sm" data-id="${h.id}" data-action="cart" ${!h.disponible ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
+           Carrito
+        </button>
+        <button class="btn btn-outline btn-sm" data-id="${h.id}" data-action="fav">
+           Fav
+        </button>
+      </div>
+    </div>`;
+  }
+
+  function attachCardEvents() {
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id);
+        const helis = await fetchJSON('/helicopteros');
+        const heli  = helis.find(h => h.id === id);
+        if (!heli) return;
+        if (btn.dataset.action === 'cart') addToCart(heli);
+        if (btn.dataset.action === 'fav')  addToFavorites(heli);
+      });
+    });
+  }
+</script>
+</body>
+</html>

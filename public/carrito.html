@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito — AeroLux</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">✈ AeroLux</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Modal de confirmación de compra -->
+<div id="buy-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div style="font-size:3rem;margin-bottom:16px"></div>
+    <h3>¡Compra Exitosa!</h3>
+    <p>Gracias por tu adquisición. Un asesor AeroLux se pondrá en contacto contigo para coordinar los detalles del traslado.</p>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="closeBuyModal()">Continuar ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-logo">Aero<span>Lux</span></div>
+  <div class="hamburger"><span></span><span></span><span></span></div>
+  <ul class="nav-links">
+    <li><a href="index.html"> Inicio</a></li>
+    <li><a href="catalogo.html"> Catálogo</a></li>
+    <li><a href="carrito.html"> Carrito <span class="nav-badge" id="cart-badge">0</span></a></li>
+    <li><a href="favoritos.html"> Favoritos <span class="nav-badge" id="fav-badge">0</span></a></li>
+    <li><a href="admin.html"> Admin</a></li>
+  </ul>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <p class="section-subtitle">✦ Mi Selección</p>
+  <h1 class="section-title">Carrito de <span>Compras</span></h1>
+</div>
+
+<!-- Contenido carrito -->
+<div class="section">
+  <div id="cart-container">
+    <!-- Se rellena con JS -->
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>AeroLux</h3><p>La tienda de helicópteros de lujo más exclusiva del mercado.</p></div>
+    <div class="footer-col"><h4>Páginas</h4><a href="index.html">Inicio</a><a href="catalogo.html">Catálogo</a></div>
+    <div class="footer-col"><h4>Contacto</h4><a href="#">info@aerolux.com</a></div>
+  </div>
+  <div class="footer-bottom"><span>© 2024 AeroLux</span></div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', renderCart);
+
+  function renderCart() {
+    const container = document.getElementById('cart-container');
+    const cart = getCart();
+
+    if (cart.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon"></div>
+          <h2 class="empty-state__title">Tu carrito está vacío</h2>
+          <p style="color:var(--gray);margin-top:8px;margin-bottom:28px">Agrega helicópteros desde el catálogo</p>
+          <a href="catalogo.html" class="btn btn-gold">Explorar Catálogo</a>
+        </div>`;
+      return;
+    }
+
+    const total = cart.reduce((sum, h) => sum + Number(h.precio), 0);
+
+    container.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:0;" id="cart-list">
+        ${cart.map(h => `
+          <div class="cart-item" id="item-${h.id}">
+            <img class="cart-item__img"
+              src="${h.imagen || 'https://via.placeholder.com/100x70/1a1a1a/d4af37?text=Heli'}"
+              alt="${h.marca} ${h.modelo}"
+              onerror="this.src='https://via.placeholder.com/100x70/1a1a1a/d4af37?text=Heli'" />
+            <div class="cart-item__info">
+              <p class="cart-item__brand">${h.marca}</p>
+              <p class="cart-item__name">${h.modelo} — ${h.anio}</p>
+              <p class="cart-item__price">${formatPrice(h.precio)}</p>
+            </div>
+            <button class="cart-item__remove" onclick="handleRemove(${h.id})" title="Eliminar">✕</button>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="cart-summary">
+        <div class="cart-total">
+          <div>
+            <p class="cart-total__label">Total de la compra</p>
+            <p style="font-size:.75rem;color:var(--gray);margin-top:2px">${cart.length} aeronave${cart.length > 1 ? 's' : ''}</p>
+          </div>
+          <p class="cart-total__amount">${formatPrice(total)}</p>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-gold" style="flex:1;min-width:160px" onclick="handleBuy()">
+            ✦ Confirmar Compra
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="handleClear()">
+             Vaciar carrito
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function handleRemove(id) {
+    removeFromCart(id);
+    const el = document.getElementById(`item-${id}`);
+    if (el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-20px)';
+      el.style.transition = 'all 0.3s ease';
+      setTimeout(renderCart, 300);
+    }
+    showToast('Helicóptero eliminado del carrito', 'info');
+  }
+
+  function handleClear() {
+    if (!confirm('¿Seguro que quieres vaciar el carrito?')) return;
+    clearCart();
+    renderCart();
+    showToast('Carrito vaciado', 'info');
+  }
+
+  function handleBuy() {
+    document.getElementById('buy-modal').classList.remove('hidden');
+    clearCart();
+  }
+
+  function closeBuyModal() {
+    document.getElementById('buy-modal').classList.add('hidden');
+    renderCart();
+    showToast('¡Compra procesada con éxito! ', 'success');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo — AeroLux</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">✈ AeroLux</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-logo">Aero<span>Lux</span></div>
+  <div class="hamburger"><span></span><span></span><span></span></div>
+  <ul class="nav-links">
+    <li><a href="index.html"> Inicio</a></li>
+    <li><a href="catalogo.html"> Catálogo</a></li>
+    <li><a href="carrito.html"> Carrito <span class="nav-badge" id="cart-badge">0</span></a></li>
+    <li><a href="favoritos.html"> Favoritos <span class="nav-badge" id="fav-badge">0</span></a></li>
+    <li><a href="admin.html"> Admin</a></li>
+  </ul>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <p class="section-subtitle">✦ Flota Completa</p>
+  <h1 class="section-title">Catálogo de <span>Helicópteros</span></h1>
+</div>
+
+<!-- Catálogo -->
+<div class="section">
+  <!-- Filtros rápidos -->
+  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px; align-items:center;">
+    <button class="btn btn-gold btn-sm filter-btn active" data-filter="all">Todos</button>
+    <button class="btn btn-outline btn-sm filter-btn" data-filter="available">Solo disponibles</button>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+      <label style="font-size:.75rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px;">Ordenar:</label>
+      <select id="sort-select" style="background:var(--black-card);border:1px solid rgba(212,175,55,.2);color:var(--white);padding:8px 14px;border-radius:6px;font-family:var(--font-body);font-size:.8rem;">
+        <option value="default">Por defecto</option>
+        <option value="price-asc">Precio: menor a mayor</option>
+        <option value="price-desc">Precio: mayor a menor</option>
+        <option value="year-desc">Año más reciente</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="catalog-grid" class="heli-grid">
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="loader-spinner" style="margin:0 auto 20px"></div>
+      <p style="color:var(--gray)">Cargando flota...</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>AeroLux</h3>
+      <p>La tienda de helicópteros de lujo más exclusiva del mercado.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Páginas</h4>
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="carrito.html">Carrito</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="#">info@aerolux.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 AeroLux</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  let allHelicopters = [];
+  let currentFilter = 'all';
+  let currentSort   = 'default';
+
+  document.addEventListener('DOMContentLoaded', loadCatalog);
+
+  async function loadCatalog() {
+    const grid = document.getElementById('catalog-grid');
+    try {
+      allHelicopters = await fetchJSON('/helicopteros');
+      renderCatalog();
+    } catch (err) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state__icon">⚠️</div>
+          <p class="empty-state__title">Error al cargar el catálogo</p>
+          <p style="color:var(--gray);font-size:.82rem;margin-top:8px">${err.message}</p>
+          <button class="btn btn-outline btn-sm" style="margin-top:20px" onclick="loadCatalog()">Reintentar</button>
+        </div>`;
+    }
+  }
+
+  function renderCatalog() {
+    const grid = document.getElementById('catalog-grid');
+    let helis  = [...allHelicopters];
+
+    // Filtrar
+    if (currentFilter === 'available') helis = helis.filter(h => h.disponible);
+
+    // Ordenar
+    if (currentSort === 'price-asc')  helis.sort((a, b) => a.precio - b.precio);
+    if (currentSort === 'price-desc') helis.sort((a, b) => b.precio - a.precio);
+    if (currentSort === 'year-desc')  helis.sort((a, b) => b.anio   - a.anio);
+
+    if (helis.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state__icon">🚁</div>
+          <p class="empty-state__title">Sin resultados</p>
+          <p style="color:var(--gray);font-size:.82rem">No hay helicópteros que coincidan con los filtros.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = helis.map(h => `
+      <div class="heli-card" data-id="${h.id}">
+        <div class="heli-card__img-wrap">
+          <img class="heli-card__img"
+            src="${h.imagen || 'https://via.placeholder.com/400x210/1a1a1a/d4af37?text=Sin+Imagen'}"
+            alt="${h.marca} ${h.modelo}" loading="lazy"
+            onerror="this.src='https://via.placeholder.com/400x210/1a1a1a/d4af37?text=Sin+Imagen'"/>
+          <span class="heli-card__badge ${h.disponible ? 'badge-available' : 'badge-unavailable'}">
+            ${h.disponible ? 'Disponible' : 'No disponible'}
+          </span>
+        </div>
+        <div class="heli-card__body">
+          <p class="heli-card__brand">${h.marca}</p>
+          <h3 class="heli-card__model">${h.modelo}</h3>
+          <p class="heli-card__year">Año ${h.anio}</p>
+          <p class="heli-card__price">${formatPrice(h.precio)}</p>
+        </div>
+        <div class="heli-card__actions">
+          <button class="btn btn-gold btn-sm"
+            onclick="handleCart(${h.id})"
+            ${!h.disponible ? 'disabled style="opacity:.4;cursor:not-allowed"' : ''}>
+             Carrito
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="handleFav(${h.id})">
+             Favorito
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function handleCart(id) {
+    const h = allHelicopters.find(x => x.id === id);
+    if (h) addToCart(h);
+  }
+
+  function handleFav(id) {
+    const h = allHelicopters.find(x => x.id === id);
+    if (h) addToFavorites(h);
+  }
+
+  // Filtros
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'btn-gold'));
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('btn-outline'));
+      btn.classList.add('active', 'btn-gold');
+      btn.classList.remove('btn-outline');
+      currentFilter = btn.dataset.filter;
+      renderCatalog();
+    });
+  });
+
+  document.getElementById('sort-select').addEventListener('change', e => {
+    currentSort = e.target.value;
+    renderCatalog();
+  });
+</script>
+</body>
+</html>

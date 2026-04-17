@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administrador — AeroLux</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">✈ AeroLux</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Modal de confirmación de eliminación -->
+<div id="delete-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+    <h3>¿Eliminar Helicóptero?</h3>
+    <p>Esta acción no se puede deshacer. El helicóptero será eliminado permanentemente del catálogo.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="confirm-delete-btn">Eliminar</button>
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-logo">Aero<span>Lux</span></div>
+  <div class="hamburger"><span></span><span></span><span></span></div>
+  <ul class="nav-links">
+    <li><a href="index.html"> Inicio</a></li>
+    <li><a href="catalogo.html"> Catálogo</a></li>
+    <li><a href="carrito.html"> Carrito <span class="nav-badge" id="cart-badge">0</span></a></li>
+    <li><a href="favoritos.html"> Favoritos <span class="nav-badge" id="fav-badge">0</span></a></li>
+    <li><a href="admin.html"> Admin</a></li>
+  </ul>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <p class="section-subtitle">✦ Panel de Control</p>
+  <h1 class="section-title">Panel de <span>Administración</span></h1>
+</div>
+
+<!-- Admin Layout -->
+<div class="section">
+  <div class="admin-layout">
+
+    <!-- ── Formulario ── -->
+    <div class="admin-form" id="form-panel">
+      <h2 id="form-title">Agregar <span>Helicóptero</span></h2>
+
+      <div class="form-group">
+        <label>Marca *</label>
+        <input type="text" id="f-marca" placeholder="Ej: Airbus, Bell, Sikorsky" />
+      </div>
+
+      <div class="form-group">
+        <label>Modelo *</label>
+        <input type="text" id="f-modelo" placeholder="Ej: H145, 429 GlobalRanger" />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="number" id="f-anio" placeholder="2024" min="1950" max="2030" />
+        </div>
+        <div class="form-group">
+          <label>Precio (USD) *</label>
+          <input type="number" id="f-precio" placeholder="1000000" min="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>URL de Imagen</label>
+        <input type="url" id="f-imagen" placeholder="https://..." />
+      </div>
+
+      <!-- Preview de imagen -->
+      <div id="img-preview-wrap" style="margin-bottom:16px; display:none;">
+        <img id="img-preview" style="width:100%;height:150px;object-fit:cover;border-radius:8px;border:1px solid rgba(212,175,55,.2);" />
+      </div>
+
+      <div class="form-checkbox">
+        <input type="checkbox" id="f-disponible" checked />
+        <label for="f-disponible">Disponible en catálogo</label>
+      </div>
+
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-gold" id="submit-btn" onclick="handleSubmit()" style="flex:1">
+          ➕ Agregar Helicóptero
+        </button>
+        <button class="btn btn-outline btn-sm" id="cancel-btn" onclick="resetForm()" style="display:none">
+          Cancelar
+        </button>
+      </div>
+
+      <!-- Mensaje de estado del formulario -->
+      <div id="form-msg" style="margin-top:14px;display:none;padding:10px 14px;border-radius:6px;font-size:.82rem;"></div>
+    </div>
+
+    <!-- ── Lista de helicópteros ── -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <h2 style="font-family:var(--font-display);font-size:1.8rem;color:var(--white)">
+          Flota <span style="color:var(--gold)">Registrada</span>
+          <span id="count-badge" style="font-size:1rem;color:var(--gray);font-family:var(--font-body);font-weight:400;margin-left:10px"></span>
+        </h2>
+        <button class="btn btn-outline btn-sm" onclick="loadList()">↻ Actualizar</button>
+      </div>
+
+      <div id="admin-list" class="admin-list">
+        <div style="text-align:center;padding:40px;color:var(--gray)">
+          <div class="loader-spinner" style="margin:0 auto 16px"></div>
+          <p>Cargando lista...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><h3>AeroLux</h3><p>Panel de administración del catálogo de aeronaves.</p></div>
+    <div class="footer-col"><h4>Páginas</h4><a href="index.html">Inicio</a><a href="catalogo.html">Catálogo</a></div>
+    <div class="footer-col"><h4>Contacto</h4><a href="#">admin@aerolux.com</a></div>
+  </div>
+  <div class="footer-bottom"><span>© 2024 AeroLux Admin</span></div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  let editingId  = null;
+  let deleteTargetId = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadList();
+
+    // Preview de imagen en tiempo real
+    document.getElementById('f-imagen').addEventListener('input', e => {
+      const url   = e.target.value.trim();
+      const wrap  = document.getElementById('img-preview-wrap');
+      const img   = document.getElementById('img-preview');
+      if (url) {
+        img.src = url;
+        wrap.style.display = 'block';
+      } else {
+        wrap.style.display = 'none';
+      }
+    });
+  });
+
+  // ─── Cargar lista ───────────────────────────────────────────
+  async function loadList() {
+    const list = document.getElementById('admin-list');
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray)"><div class="loader-spinner" style="margin:0 auto 16px"></div><p>Cargando...</p></div>`;
+    try {
+      const helis = await fetchJSON('/helicopteros');
+      document.getElementById('count-badge').textContent = `(${helis.length})`;
+
+      if (helis.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state__icon"></div>
+            <p class="empty-state__title">Sin helicópteros</p>
+            <p style="color:var(--gray)">Agrega el primero usando el formulario</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = helis.map(h => `
+        <div class="admin-item" id="admin-item-${h.id}">
+          <img src="${h.imagen || 'https://via.placeholder.com/70x50/1a1a1a/d4af37?text=Heli'}"
+               alt="${h.marca} ${h.modelo}"
+               onerror="this.src='https://via.placeholder.com/70x50/1a1a1a/d4af37?text=Heli'" />
+          <div class="admin-item__info">
+            <p class="admin-item__name">${h.marca} ${h.modelo}</p>
+            <p class="admin-item__meta">
+              ${h.anio} · ${formatPrice(h.precio)}
+              <span style="margin-left:8px;padding:2px 8px;border-radius:12px;font-size:.65rem;
+                background:${h.disponible ? 'rgba(76,175,80,.2)' : 'rgba(224,82,82,.2)'};
+                color:${h.disponible ? '#4caf50' : '#e05252'}">
+                ${h.disponible ? 'Disponible' : 'No disponible'}
+              </span>
+            </p>
+          </div>
+          <div class="admin-item__actions">
+            <button class="btn btn-outline btn-sm" onclick="startEdit(${h.id})"> Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDelete(${h.id})"> Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-state__icon">⚠️</div><p class="empty-state__title">Error al cargar</p><p style="color:var(--gray)">${err.message}</p></div>`;
+    }
+  }
+
+  // ─── Submit: Crear o Actualizar ─────────────────────────────
+  async function handleSubmit() {
+    const marca     = document.getElementById('f-marca').value.trim();
+    const modelo    = document.getElementById('f-modelo').value.trim();
+    const anio      = parseInt(document.getElementById('f-anio').value);
+    const precio    = parseFloat(document.getElementById('f-precio').value);
+    const imagen    = document.getElementById('f-imagen').value.trim();
+    const disponible = document.getElementById('f-disponible').checked;
+
+    // Validación
+    if (!marca || !modelo || !anio || !precio) {
+      showFormMsg('Por favor completa todos los campos obligatorios (*)', 'error');
+      return;
+    }
+
+    const body = { marca, modelo, anio, precio, imagen, disponible };
+
+    try {
+      document.getElementById('submit-btn').textContent = 'Guardando...';
+      document.getElementById('submit-btn').disabled = true;
+
+      if (editingId) {
+        await fetchJSON(`/helicopteros/${editingId}`, {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        });
+        showFormMsg('✅ Helicóptero actualizado correctamente', 'success');
+        showToast('Helicóptero actualizado ✅', 'success');
+      } else {
+        await fetchJSON('/helicopteros', {
+          method: 'POST',
+          body: JSON.stringify(body)
+        });
+        showFormMsg('✅ Helicóptero creado correctamente', 'success');
+        showToast('Helicóptero creado ✅', 'success');
+      }
+
+      resetForm();
+      loadList();
+    } catch (err) {
+      showFormMsg(`❌ Error: ${err.message}`, 'error');
+      showToast(err.message, 'error');
+    } finally {
+      document.getElementById('submit-btn').disabled = false;
+    }
+  }
+
+  // ─── Iniciar edición ────────────────────────────────────────
+  async function startEdit(id) {
+    try {
+      const h = await fetchJSON(`/helicopteros/${id}`);
+      editingId = id;
+
+      document.getElementById('f-marca').value     = h.marca;
+      document.getElementById('f-modelo').value    = h.modelo;
+      document.getElementById('f-anio').value      = h.anio;
+      document.getElementById('f-precio').value    = h.precio;
+      document.getElementById('f-imagen').value    = h.imagen || '';
+      document.getElementById('f-disponible').checked = h.disponible;
+
+      // Mostrar preview
+      if (h.imagen) {
+        document.getElementById('img-preview').src = h.imagen;
+        document.getElementById('img-preview-wrap').style.display = 'block';
+      }
+
+      // Cambiar UI a modo edición
+      document.getElementById('form-title').innerHTML = `Editar <span>Helicóptero</span>`;
+      document.getElementById('submit-btn').textContent = ' Actualizar Helicóptero';
+      document.getElementById('submit-btn').classList.replace('btn-gold', 'btn-outline');
+      document.getElementById('cancel-btn').style.display = 'inline-flex';
+
+      // Scroll al formulario
+      document.getElementById('form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showFormMsg('Modo edición activo. Modifica los campos y guarda.', 'info');
+
+    } catch (err) {
+      showToast('Error al cargar datos: ' + err.message, 'error');
+    }
+  }
+
+  // ─── Reset formulario ───────────────────────────────────────
+  function resetForm() {
+    editingId = null;
+    ['f-marca','f-modelo','f-anio','f-precio','f-imagen'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-disponible').checked = true;
+    document.getElementById('img-preview-wrap').style.display = 'none';
+    document.getElementById('form-title').innerHTML = `Agregar <span>Helicóptero</span>`;
+    document.getElementById('submit-btn').textContent = '➕ Agregar Helicóptero';
+    document.getElementById('submit-btn').classList.replace('btn-outline', 'btn-gold');
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('cancel-btn').style.display = 'none';
+    hideFormMsg();
+  }
+
+  // ─── Mensajes del formulario ────────────────────────────────
+  function showFormMsg(msg, type) {
+    const el = document.getElementById('form-msg');
+    const colors = {
+      success: { bg: 'rgba(76,175,80,.1)',  border: '#4caf50', color: '#4caf50' },
+      error:   { bg: 'rgba(224,82,82,.1)',  border: '#e05252', color: '#e05252' },
+      info:    { bg: 'rgba(212,175,55,.1)', border: '#d4af37', color: '#d4af37' }
+    };
+    const c = colors[type] || colors.info;
+    el.style.display   = 'block';
+    el.style.background = c.bg;
+    el.style.border    = `1px solid ${c.border}`;
+    el.style.color     = c.color;
+    el.textContent     = msg;
+  }
+
+  function hideFormMsg() {
+    document.getElementById('form-msg').style.display = 'none';
+  }
+
+  // ─── Eliminar con confirmación ──────────────────────────────
+  function confirmDelete(id) {
+    deleteTargetId = id;
+    document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('confirm-delete-btn').onclick = executeDelete;
+  }
+
+  function closeDeleteModal() {
+    deleteTargetId = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+  }
+
+  async function executeDelete() {
+    if (!deleteTargetId) return;
+    try {
+      await fetchJSON(`/helicopteros/${deleteTargetId}`, { method: 'DELETE' });
+      closeDeleteModal();
+      showToast('Helicóptero eliminado correctamente ', 'success');
+      loadList();
+      // Si se estaba editando el mismo, resetear
+      if (editingId === deleteTargetId) resetForm();
+    } catch (err) {
+      closeDeleteModal();
+      showToast('Error al eliminar: ' + err.message, 'error');
+    }
+  }
+</script>
+</body>
+</html>
