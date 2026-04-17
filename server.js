@@ -160,8 +160,8 @@ app.delete('/helicopteros/:id', async (req, res) => {
   }
 });
 
-// ─── Fallback: servir index.html para rutas no-API ────────────
-app.get('*', (req, res) => {
+// Fallback solo si no empieza con /helicopteros
+app.get(/^\/(?!helicopteros).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
